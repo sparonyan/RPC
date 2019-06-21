@@ -6,7 +6,8 @@
 // Author: Morris Bernstein
 // Copyright 2019, Systems Deployment, LLC.
 
-//Modified: Satine Paronyan
+// Project: Remote Procedure Calls
+// Modified: Satine Paronyan
 
 #if !defined(RemoteFileSystem_H)
 #define RemoteFileSystem_H
@@ -19,7 +20,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#define BUFLEN 65536  //max size of packet
+#define BUFLEN 65000
 
 class RemoteFileSystem {
  public:
@@ -37,18 +38,15 @@ class RemoteFileSystem {
   private:
     // Only RemoteFileSystem can open a file.
     friend class RemoteFileSystem;
-    File(RemoteFileSystem* filesystem, const char *pathname, char *mode, uint64_t fd);
+    File(RemoteFileSystem* filesystem, uint64_t fd);
 
     // Disallow copy & assignment
     File(File const &) = delete;
     void operator=(File const &) = delete;
 
     RemoteFileSystem *fs;
-    const char *filename;
-    char fmode;
     uint64_t fd;
   };
-
 
   // Connect to remote system.  Throw error if connection cannot be
   // made.
@@ -62,6 +60,13 @@ class RemoteFileSystem {
 
   // Return new open file object.  Client is responsible for
   // deleting.
+  // The argument mode must include one of the following access modes:
+  // "r" - read only. File should exist in order to be opened with this mode.
+  // "w" - write only. Truncate file to zero length or create text file for writing.
+  //       The stream is positioned at the beginning of the file.
+  // "r+" - read/write (file is not truncated). If file does not exist
+  //        it will be created. The content of existing file is not truncated.
+  //
   File *open(const char *pathname, char *mode);
 
   int chmod(const char *pathname, mode_t mode);
@@ -83,9 +88,6 @@ class RemoteFileSystem {
   int port;
   int sockfd;
   struct sockaddr_in servaddr;
-  socklen_t servaddrlen;  // length of address
-
-
 };
 
 

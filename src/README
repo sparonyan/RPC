@@ -1,0 +1,30 @@
+Project: Remote Procedure Calls
+Author: Satine Paronyan.
+Spring 2019
+
+
+Build script is included.
+
+===== RUN programs =====
+In order to run program, use the bellow commands
+(test.txt is included in submitted folder, but you can use your own file):
+Note: clientRFS is a simple client driver that tests RemoteFileSystem. File used in this program
+will be renamed at the end of execution.
+
+./serverRPC 1401
+
+./clientRFS 127.0.0.1 1401 test.txt
+
+Note:
+Some Linux systems have a man page for getrandom and the correct syscall definitions, but no C function.
+As appeared, Linux version on lab machines also does not have getrandom() function, that's why 
+I implemented own function for the purpose of generating random 64 bit number.
+
+
+In order to handle concurrent requests there are two approaches can be used. One approach is after
+creating a socket, fork() a process child. This way one socket is used to process many requests.
+Another approach is to have a queue of threads running and when a new request received into socket,
+then the thread that is available will take the request and process it. Both of these approaches
+can be used to multithreaded handle request/response mechanism between client and server in assignment 4.
+In my case, I would pre-creates a thread pool on server initialization and when receiving a packet
+from client I would hand-off the processing of the request to one of the threads in the pool.
